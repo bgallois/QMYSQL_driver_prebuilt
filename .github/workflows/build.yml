@@ -1,0 +1,134 @@
+name: Continous Builds
+
+on:
+  push:
+    branches: [qt5]
+
+jobs:
+  job_1:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: install dep
+        run: |
+            sudo apt-get update
+            sudo apt-get dist-upgrade
+            sudo apt-get install libmariadb-dev
+      - name: install qt
+        run: |
+          pip install aqtinstall
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop 5.15.2
+          echo ${{ github.workspace }}/Qt/5.15.2/gcc_64/bin/ >> $GITHUB_PATH
+      - name: build
+        run: |
+          ./build_qsql.sh 5.15.2 linux
+          cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
+          mkdir mariadb_driver
+          cp -r plugins/ mariadb_driver/
+          cp /usr/lib/x86_64-linux-gnu/libmariadb.so mariadb_driver/
+
+      - name: Linux artefact
+        uses: actions/upload-artifact@v1
+        with:
+          name: Linux
+          path: ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/mariadb_driver/
+  job_2:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: win64
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: install qt
+        run: |
+          pip install aqtinstall
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_msvc2019_64
+          echo "${{ github.workspace }}/Qt/5.15.2/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: mariadb
+        shell: bash
+        run: |
+          choco install -y git mariadb
+      - name: build
+        shell: cmd
+        run: |
+          build_qsql.bat 5.15.2
+      - name: mariadb
+        shell: bash
+        run: |
+          cd qtbase/src/plugins/sqldrivers/
+          mkdir mariadb_driver
+          cp -r plugins/ mariadb_driver/
+          cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
+      - name: Windows artefact
+        uses: actions/upload-artifact@v1
+        with:
+          name: Windows_2019
+          path: ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/mariadb_driver/
+  job_3:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: install qt
+        run: |
+          pip install aqtinstall
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_mingw81
+          echo "${{ github.workspace }}/Qt/5.15.2/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          aqt install-tool windows desktop -O ${{ github.workspace }}/Qt/ tools_mingw qt.tools.win64_mingw810
+          echo "${{ github.workspace }}/Qt/Tools/mingw810_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: mariadb
+        shell: bash
+        run: |
+          choco install -y git mariadb
+      - name: build
+        shell: cmd
+        run: |
+          build_qsql_mingw.bat 5.15.2
+      - name: mariadb
+        shell: bash
+        run: |
+          cd qtbase/src/plugins/sqldrivers/
+          mkdir mariadb_driver
+          cp -r plugins/ mariadb_driver/
+          cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
+      - name: Windows artefact
+        uses: actions/upload-artifact@v1
+        with:
+          name: Windows_Mingw
+          path: ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/mariadb_driver/
+  job_4:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: install qt
+        run: |
+          pip install aqtinstall
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop 5.15.2
+          echo "${{ github.workspace }}/Qt/5.15.2/clang_64/bin/" >> $GITHUB_PATH
+          export PATH=$PATH:"${{ github.workspace }}/Qt/5.15.2/clang_64/bin/"
+          brew update
+          brew upgrade
+          brew install boost traildb/judy/judy
+          brew install mariadb
+          export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
+          ./build_qsql.sh 5.15.2 mac
+          cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
+          mkdir mariadb_driver
+          cp -r plugins/ mariadb_driver/
+          cp /usr/local/lib/libmariadb.dylib mariadb_driver/
+      - name: Mac artefact
+        uses: actions/upload-artifact@v1
+        with:
+          name: MacOS
+          path: ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/mariadb_driver/
