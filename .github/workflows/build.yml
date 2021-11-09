@@ -26,8 +26,8 @@ jobs:
         run: |
           ./build_qsql.sh 5.15.2 linux
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/libqsqlmysql.so mariadb_driver/plugins/sqldrivers
           cp /usr/lib/x86_64-linux-gnu/libmariadb.so mariadb_driver/
 
       - name: Linux artefact
@@ -62,8 +62,8 @@ jobs:
         shell: bash
         run: |
           cd qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/qsqlmysql*.dll mariadb_driver/plugins/sqldrivers
           cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
       - name: Windows artefact
         uses: actions/upload-artifact@v1
@@ -96,8 +96,8 @@ jobs:
         shell: bash
         run: |
           cd qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/qsqlmysql*.dll mariadb_driver/plugins/sqldrivers
           cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
       - name: Windows artefact
         uses: actions/upload-artifact@v1
@@ -124,8 +124,8 @@ jobs:
           export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
           ./build_qsql.sh 5.15.2 mac
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/libqsqlmysql.dylib mariadb_driver/plugins/sqldrivers
           cp /usr/local/lib/libmariadb.dylib mariadb_driver/
       - name: Mac artefact
         uses: actions/upload-artifact@v1
