@@ -13,11 +13,11 @@ else
   cd src/plugins/sqldrivers
   if [ "$2" = "linux" ]
   then
-    qmake -- MYSQL_INCDIR=/usr/include/mariadb/ MYSQL_LIBDIR=/usr/lib/x86_64-linux-gnu/
-    make sub-mysql
+    cmake . -DMySQL_INCLUDE_DIR=/usr/include/mariadb/ -DMySQL_LIBRARY=/usr/lib/x86_64-linux-gnu/libmariadb.so -DCMAKE_BUILD_TYPE=Release
+    make
   elif [ "$2" = "mac" ]
   then
-    qmake -- MYSQL_INCDIR=/usr/local/include/mysql/ MYSQL_LIBDIR=/usr/local/lib
-    make sub-mysql
+    cmake -DMySQL_INCLUDE_DIR=/usr/local/include/mysql/ -DMySQL_LIBRARY=/usr/local/lib/libmariadb.dylib -DCMAKE_PREFIX_PATH=../../../../Qt/6.2.1/macos/lib/cmake -DCMAKE_BUILD_TYPE=Release
+    make
   fi
 fi

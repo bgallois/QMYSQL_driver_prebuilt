@@ -2,7 +2,7 @@ name: Continous Builds
 
 on:
   push:
-    branches: [master]
+    branches: [qt6]
 
 jobs:
   job_1:
@@ -16,18 +16,18 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get dist-upgrade
-            sudo apt-get install libmariadb-dev
+            sudo apt-get install libmariadb-dev cmake
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop 5.15.2
-          echo ${{ github.workspace }}/Qt/5.15.2/gcc_64/bin/ >> $GITHUB_PATH
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop 6.2.1
+          echo ${{ github.workspace }}/Qt/6.2.1/gcc_64/bin/ >> $GITHUB_PATH
       - name: build
         run: |
-          ./build_qsql.sh 5.15.2 linux
+          ./build_qsql.sh 6.2.1 linux
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/libqsqlmysql.so mariadb_driver/plugins/sqldrivers
           cp /usr/lib/x86_64-linux-gnu/libmariadb.so mariadb_driver/
 
       - name: Linux artefact
@@ -48,22 +48,22 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_msvc2019_64
-          echo "${{ github.workspace }}/Qt/5.15.2/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 6.2.1 win64_msvc2019_64
+          echo "${{ github.workspace }}/Qt/6.2.1/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: mariadb
         shell: bash
         run: |
-          choco install -y git mariadb
+          choco install -y git mariadb cmake
       - name: build
         shell: cmd
         run: |
-          build_qsql.bat 5.15.2
+          build_qsql.bat 6.2.1
       - name: mariadb
         shell: bash
         run: |
           cd qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/qsqlmysql*.dll mariadb_driver/plugins/sqldrivers
           cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
       - name: Windows artefact
         uses: actions/upload-artifact@v1
@@ -80,24 +80,24 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_mingw81
-          echo "${{ github.workspace }}/Qt/5.15.2/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 6.2.1 win64_mingw81
+          echo "${{ github.workspace }}/Qt/6.2.1/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           aqt install-tool windows desktop -O ${{ github.workspace }}/Qt/ tools_mingw qt.tools.win64_mingw810
           echo "${{ github.workspace }}/Qt/Tools/mingw810_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: mariadb
         shell: bash
         run: |
-          choco install -y git mariadb
+          choco install -y git mariadb cmake
       - name: build
         shell: cmd
         run: |
-          build_qsql_mingw.bat 5.15.2
+          build_qsql_mingw.bat 6.2.1
       - name: mariadb
         shell: bash
         run: |
           cd qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/qsqlmysql*.dll mariadb_driver/plugins/sqldrivers
           cp "C:/Program Files/MariaDB 10.6/lib/libmariadb.dll" mariadb_driver/
       - name: Windows artefact
         uses: actions/upload-artifact@v1
@@ -114,18 +114,18 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop 5.15.2
-          echo "${{ github.workspace }}/Qt/5.15.2/clang_64/bin/" >> $GITHUB_PATH
-          export PATH=$PATH:"${{ github.workspace }}/Qt/5.15.2/clang_64/bin/"
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop 6.2.1
+          echo "${{ github.workspace }}/Qt/6.2.1/macos/bin/" >> $GITHUB_PATH
+          export PATH=$PATH:"${{ github.workspace }}/Qt/6.2.1/clang_64/bin/"
           brew update
           brew upgrade
           brew install boost traildb/judy/judy
-          brew install mariadb
+          brew install mariadb cmake
           export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-          ./build_qsql.sh 5.15.2 mac
+          ./build_qsql.sh 6.2.1 mac
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
-          mkdir mariadb_driver
-          cp -r plugins/ mariadb_driver/
+          mkdir -p mariadb_driver/plugins/sqldrivers
+          cp plugins/sqldrivers/libqsqlmysql.dylib mariadb_driver/plugins/sqldrivers
           cp /usr/local/lib/libmariadb.dylib mariadb_driver/
       - name: Mac artefact
         uses: actions/upload-artifact@v1
