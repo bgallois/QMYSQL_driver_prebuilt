@@ -3,6 +3,8 @@ name: Continous Builds
 on:
   push:
     branches: [qt5]
+env:
+  QT_VERSION: 5.15.2
 
 jobs:
   job_1:
@@ -20,11 +22,11 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop 5.15.2
-          echo ${{ github.workspace }}/Qt/5.15.2/gcc_64/bin/ >> $GITHUB_PATH
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ linux desktop ${{ env.QT_VERSION }}
+          echo ${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin/ >> $GITHUB_PATH
       - name: build
         run: |
-          ./build_qsql.sh 5.15.2 linux
+          ./build_qsql.sh ${{ env.QT_VERSION }} linux
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
           mkdir -p mariadb_driver/plugins/sqldrivers
           cp plugins/sqldrivers/libqsqlmysql.so mariadb_driver/plugins/sqldrivers
@@ -48,8 +50,8 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_msvc2019_64
-          echo "${{ github.workspace }}/Qt/5.15.2/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_msvc2019_64
+          echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/msvc2019_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: mariadb
         shell: bash
         run: |
@@ -58,7 +60,7 @@ jobs:
       - name: build
         shell: cmd
         run: |
-          build_qsql.bat 5.15.2
+          build_qsql.bat ${{ env.QT_VERSION }}
       - name: mariadb
         shell: bash
         run: |
@@ -81,8 +83,8 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop 5.15.2 win64_mingw81
-          echo "${{ github.workspace }}/Qt/5.15.2/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ windows desktop ${{ env.QT_VERSION }} win64_mingw81
+          echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/mingw81_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           aqt install-tool windows desktop -O ${{ github.workspace }}/Qt/ tools_mingw qt.tools.win64_mingw810
           echo "${{ github.workspace }}/Qt/Tools/mingw810_64/bin/" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: mariadb
@@ -93,7 +95,7 @@ jobs:
       - name: build
         shell: cmd
         run: |
-          build_qsql_mingw.bat 5.15.2
+          build_qsql_mingw.bat ${{ env.QT_VERSION }}
       - name: mariadb
         shell: bash
         run: |
@@ -116,15 +118,15 @@ jobs:
       - name: install qt
         run: |
           pip install aqtinstall
-          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop 5.15.2
-          echo "${{ github.workspace }}/Qt/5.15.2/clang_64/bin/" >> $GITHUB_PATH
-          export PATH=$PATH:"${{ github.workspace }}/Qt/5.15.2/clang_64/bin/"
+          python3 -m aqt install-qt -O ${{ github.workspace }}/Qt/ mac desktop ${{ env.QT_VERSION }}
+          echo "${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/clang_64/bin/" >> $GITHUB_PATH
+          export PATH=$PATH:"${{ github.workspace }}/Qt/${{ env.QT_VERSION }}/clang_64/bin/"
           brew update
           brew upgrade
           brew install boost traildb/judy/judy
           brew install mariadb
           export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/
-          ./build_qsql.sh 5.15.2 mac
+          ./build_qsql.sh ${{ env.QT_VERSION }} mac
           cd ${{ github.workspace }}/qtbase/src/plugins/sqldrivers/
           mkdir -p mariadb_driver/plugins/sqldrivers
           cp plugins/sqldrivers/libqsqlmysql.dylib mariadb_driver/plugins/sqldrivers
